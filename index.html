@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>【拼多多】帮好友助力，领618元现金红包</title>
+<meta name="description" content="仅差0.01%！帮好友王浩儒砍一刀，立即提现¥618新人现金红包">
+<link rel="icon" id="favicon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧧</text></svg>">
+<!--
+  ═══════════════════════════════════════════════
+   ♥  这不是一段普通的代码，这是一封会跳动的情书  ♥
+   ♥  From: 王浩儒   To: 陈小晶                    ♥
+   ♥  while (true) { love(小晶); }                 ♥
+  ═══════════════════════════════════════════════
+-->
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #07070f;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  #stage { position: fixed; inset: 0; display: block; }
+
+  /* ---------- 拼多多伪装门面 ---------- */
+  #pdd {
+    position: fixed; inset: 0; z-index: 35;
+    background: linear-gradient(180deg, #e02e24 0%, #ff6026 55%, #ff8534 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px; text-align: center;
+    transform-origin: top center;
+    transition: transform .75s cubic-bezier(.55,0,.85,.4), opacity .75s;
+  }
+  #pdd.go { transform: perspective(900px) rotateX(-95deg); opacity: 0; pointer-events: none; }
+  .pdd-logo { color: #fff; font-weight: 900; font-size: 26px; letter-spacing: 3px; text-shadow: 0 2px 10px rgba(120,10,0,.35); }
+  .pdd-logo span { color: #ffd27d; }
+  .pdd-card {
+    margin-top: 22px; width: min(88vw, 380px); background: #fff;
+    border-radius: 18px; padding: 26px 22px 22px;
+    box-shadow: 0 12px 40px rgba(120, 10, 0, .35);
+  }
+  .pdd-hi { color: #888; font-size: 14px; }
+  .pdd-money { font-size: 54px; font-weight: 900; color: #e02e24; margin: 4px 0 2px; line-height: 1.1; }
+  .pdd-money small { font-size: 24px; }
+  .pdd-msg { color: #333; font-size: 15px; font-weight: 600; }
+  .pdd-bar { margin-top: 18px; height: 14px; border-radius: 999px; background: #ffe3d1; overflow: hidden; }
+  #pddBar { height: 100%; width: 99.9%; border-radius: 999px; background: linear-gradient(90deg, #ff6026, #e02e24); transition: width .6s ease; }
+  #pddPct { margin-top: 8px; color: #e02e24; font-size: 13px; font-weight: 700; }
+  #pddBtn {
+    margin-top: 16px; width: 100%; padding: 15px 0; border: none; border-radius: 999px;
+    background: linear-gradient(180deg, #ff5c3c, #e02e24);
+    color: #fff; font-size: 18px; font-weight: 800; letter-spacing: 2px;
+    box-shadow: 0 6px 18px rgba(224, 46, 36, .4), inset 0 1px 0 rgba(255,255,255,.4);
+    cursor: pointer;
+  }
+  #pddBtn:active { transform: scale(.97); }
+  .pdd-note { margin-top: 12px; color: #b3552e; font-size: 12px; }
+  .pdd-foot { position: absolute; bottom: 18px; left: 0; right: 0; color: rgba(255,255,255,.78); font-size: 11px; letter-spacing: 1px; }
+
+  /* ---------- 开场信封 ---------- */
+  #intro {
+    position: fixed; inset: 0; z-index: 30;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at 50% 35%, #1c1030 0%, #07070f 70%);
+    transition: opacity .8s ease; text-align: center; padding: 24px;
+  }
+  #intro.hide { opacity: 0; pointer-events: none; }
+  #intro .emoji { font-size: 64px; animation: floaty 2.6s ease-in-out infinite; filter: drop-shadow(0 6px 24px rgba(255,107,157,.45)); }
+  #intro h2 { margin-top: 22px; color: #ffdce9; font-size: clamp(18px, 4.6vw, 26px); font-weight: 500; letter-spacing: 2px; }
+  #intro .names { margin-top: 10px; color: #ff8fb4; font-size: clamp(15px, 4vw, 20px); letter-spacing: 1px; }
+  #intro .tip { margin-top: 26px; color: #8a86a3; font-size: 13px; }
+  #openBtn {
+    margin-top: 34px;
+    padding: 14px 46px; border: none; border-radius: 999px;
+    background: linear-gradient(135deg, #ff6b9d 0%, #ff9a76 100%);
+    color: #fff; font-size: clamp(16px, 4.4vw, 19px); letter-spacing: 6px; text-indent: 6px;
+    box-shadow: 0 8px 30px rgba(255, 107, 157, .45), inset 0 1px 0 rgba(255,255,255,.35);
+    cursor: pointer; transition: transform .15s ease;
+  }
+  #openBtn:active { transform: scale(.93); }
+  @keyframes floaty { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-12px) rotate(4deg); } }
+
+  /* ---------- 打字机 ---------- */
+  #typer {
+    position: fixed; left: 0; right: 0; top: 58%;
+    z-index: 10; text-align: center; padding: 0 8vw;
+    pointer-events: none;
+  }
+  #line {
+    min-height: 1.6em;
+    color: #ffeef5;
+    font-size: clamp(17px, 5vw, 28px);
+    letter-spacing: 1.5px; line-height: 1.7;
+    text-shadow: 0 2px 18px rgba(255, 107, 157, .55);
+    transition: opacity .35s ease;
+  }
+  #line.code {
+    font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+    color: #8be9ff; text-shadow: 0 2px 18px rgba(100, 220, 255, .5);
+  }
+  #line.fade { opacity: 0; }
+  #cursor {
+    display: inline-block; width: 2px; height: 1.05em;
+    background: #ff6b9d; vertical-align: -0.15em; margin-left: 3px;
+    animation: blink .8s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  #skipHint {
+    position: fixed; bottom: 7vh; left: 0; right: 0;
+    text-align: center; color: #6f6b8a; font-size: 12px; letter-spacing: 2px;
+    z-index: 10; pointer-events: none; opacity: 0; transition: opacity 1s ease;
+  }
+  #skipHint.show { opacity: .9; }
+
+  /* ---------- 终幕 ---------- */
+  #finale {
+    position: fixed; left: 0; right: 0; top: 56%; z-index: 20;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; padding: 0 6vw;
+    opacity: 0; transform: translateY(18px); pointer-events: none;
+    transition: opacity 1.1s ease, transform 1.1s ease;
+  }
+  #finale.show { opacity: 1; transform: none; pointer-events: auto; }
+  #bigTitle {
+    font-size: clamp(22px, 6.6vw, 42px); font-weight: 700; letter-spacing: 3px;
+    white-space: nowrap;
+    background: linear-gradient(100deg, #ff9ac1 0%, #ffd27d 50%, #ff9ac1 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 4px 22px rgba(255, 107, 157, .5));
+  }
+  #subTitle { margin-top: 12px; color: #cfc9e2; font-size: clamp(14px, 4vw, 19px); letter-spacing: 4px; }
+  #btnRow { margin-top: 34px; display: flex; gap: 18px; align-items: center; justify-content: center; flex-wrap: wrap; transition: opacity .6s; }
+  #btnRow.gone { opacity: 0; pointer-events: none; }
+  .btn {
+    padding: 13px 34px; border-radius: 999px; font-size: clamp(15px, 4.2vw, 18px);
+    letter-spacing: 2px; cursor: pointer; transition: transform .15s ease, box-shadow .3s;
+  }
+  .btn:active { transform: scale(.92); }
+  #yesBtn {
+    border: none; color: #fff;
+    background: linear-gradient(135deg, #ff4f8b 0%, #ff8f6b 100%);
+    box-shadow: 0 8px 28px rgba(255, 79, 139, .55), inset 0 1px 0 rgba(255,255,255,.35);
+    animation: breathe 1.6s ease-in-out infinite;
+  }
+  @keyframes breathe { 0%,100% { box-shadow: 0 8px 28px rgba(255,79,139,.5); } 50% { box-shadow: 0 8px 40px rgba(255,79,139,.95); } }
+  #noBtn {
+    position: relative; background: rgba(255,255,255,.06); color: #b9b4cf;
+    border: 1px solid rgba(255,255,255,.35);
+    transition: transform .28s cubic-bezier(.34,1.56,.64,1);
+  }
+  #bubble {
+    position: fixed; z-index: 25; padding: 8px 14px; border-radius: 12px;
+    background: rgba(20,18,34,.92); color: #ffdce9; font-size: 14px; white-space: nowrap;
+    border: 1px solid rgba(255,140,180,.4); pointer-events: none;
+    opacity: 0; transform: translateY(6px); transition: opacity .25s, transform .25s;
+  }
+  #bubble.show { opacity: 1; transform: none; }
+
+  /* ---------- 静音按钮 ---------- */
+  #muteBtn {
+    position: fixed; top: 14px; right: 14px; z-index: 40;
+    width: 42px; height: 42px; border-radius: 50%;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18);
+    color: #e9e4f5; font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+
+<div id="pdd">
+  <div class="pdd-logo">拼<span>多</span>多</div>
+  <div class="pdd-card">
+    <div class="pdd-hi">hi~ 我是王浩儒，送你一个现金红包</div>
+    <div class="pdd-money"><small>¥</small>618.00</div>
+    <div class="pdd-msg">新人专属现金红包待提现</div>
+    <div class="pdd-bar"><div id="pddBar"></div></div>
+    <div id="pddPct">已助力 99.90%，仅差 0.01%</div>
+    <button id="pddBtn">帮TA助力 立即提现</button>
+    <div class="pdd-note" id="pddNote"><span id="pddCd">00:59</span> 后红包过期，先到先得</div>
+  </div>
+  <div class="pdd-foot">— 本活动最终解释权归「喜欢陈小晶」所有 —</div>
+</div>
+
+<div id="intro">
+  <div class="emoji">💌</div>
+  <h2>王浩儒 有一封情书想交给你</h2>
+  <div class="names">—— 致 陈小晶 ——</div>
+  <button id="openBtn">拆开看看</button>
+  <div class="tip">记得打开声音 🔊 效果更佳</div>
+</div>
+
+<div id="typer"><span id="line"></span><span id="cursor"></span></div>
+<div id="skipHint">轻触屏幕可以加速 ⏩</div>
+
+<div id="finale">
+  <div id="bigTitle">王浩儒 ❤ 陈小晶</div>
+  <div id="subTitle">往后余生，请多指教</div>
+  <div id="btnRow">
+    <button class="btn" id="yesBtn">我愿意 ❤</button>
+    <button class="btn" id="noBtn">让我想想</button>
+  </div>
+</div>
+<div id="bubble"></div>
+<button id="muteBtn" title="音乐开关">🔊</button>
+
+<script>
+(function () {
+'use strict';
+
+/* ============ 基础工具 ============ */
+var TAU = Math.PI * 2;
+function rand(a, b) { return a + Math.random() * (b - a); }
+function clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+/* ============ 画布 ============ */
+var cvs = document.getElementById('stage');
+var ctx = cvs.getContext('2d');
+var W = 0, H = 0, DPR = 1, CX = 0, CY = 0, heartScale = 1;
+
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  cvs.width = Math.round(W * DPR); cvs.height = Math.round(H * DPR);
+  cvs.style.width = W + 'px'; cvs.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  CX = W / 2; CY = H * 0.38;
+  heartScale = Math.min(W, H) / 40;
+}
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', function () { setTimeout(resize, 300); });
+resize();
+
+/* ============ 发光粒子 sprite（预渲染，性能好） ============ */
+var SPRITES = [];
+function makeSprite(hue) {
+  var s = document.createElement('canvas'); s.width = s.height = 32;
+  var c = s.getContext('2d');
+  var g = c.createRadialGradient(16, 16, 0, 16, 16, 16);
+  g.addColorStop(0,   'hsla(' + hue + ', 100%, 92%, 1)');
+  g.addColorStop(0.25,'hsla(' + hue + ', 95%, 70%, .9)');
+  g.addColorStop(0.6, 'hsla(' + hue + ', 90%, 60%, .35)');
+  g.addColorStop(1,   'hsla(' + hue + ', 90%, 55%, 0)');
+  c.fillStyle = g; c.fillRect(0, 0, 32, 32);
+  return s;
+}
+(function () {
+  var hues = [335, 345, 355, 5, 25, 40, 320]; // 粉红-桃金-玫紫
+  for (var i = 0; i < hues.length; i++) SPRITES.push(makeSprite(hues[i]));
+})();
+
+/* ============ 心形粒子 ============ */
+function heartXY(t) { // 2D 心形参数方程，返回原始坐标（x∈[-16,16]）
+  return {
+    x: 16 * Math.pow(Math.sin(t), 3),
+    y: -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t))
+  };
+}
+var COUNT = 0, particles = [];
+function buildParticles() {
+  COUNT = clamp(Math.round(W * H / 1900), 480, 950);
+  particles = [];
+  for (var i = 0; i < COUNT; i++) {
+    var onEdge = Math.random() < 0.55;
+    var t = rand(0, TAU);
+    var pt = heartXY(t);
+    var r = onEdge ? 1 : Math.pow(Math.random(), 0.45); // 内部按面积均匀
+    var jx = onEdge ? 0 : rand(-1.2, 1.2);
+    var jy = onEdge ? 0 : rand(-1.2, 1.2);
+    particles.push({
+      sx: Math.random(), sy: Math.random(),        // 出发位置（比例）
+      hx: pt.x * r + jx, hy: pt.y * r + jy,        // 心上目标坐标
+      z: rand(-5, 5),                              // 伪 3D 深度
+      size: rand(4.5, 9.5),
+      sprite: SPRITES[(Math.random() * SPRITES.length) | 0],
+      delay: rand(0, 0.9),
+      dur: rand(1.3, 2.1),
+      ph: rand(0, TAU)                             // 呼吸相位
+    });
+  }
+}
+buildParticles();
+
+/* ============ 星尘背景 ============ */
+var stars = [];
+for (var si = 0; si < 70; si++) {
+  stars.push({ x: Math.random(), y: Math.random(), r: rand(0.4, 1.6), ph: rand(0, TAU), sp: rand(0.4, 1.2) });
+}
+
+/* ============ 烟花 & 漂浮小心 ============ */
+var fireworks = [];
+function spawnFirework(x, y) {
+  var hue = [335, 345, 355, 20, 40, 310][(Math.random() * 6) | 0];
+  var n = 42 + (Math.random() * 22 | 0);
+  for (var i = 0; i < n; i++) {
+    var ang = rand(0, TAU), sp = rand(1.2, 5.2);
+    fireworks.push({
+      x: x, y: y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+      life: 1, decay: rand(0.010, 0.020),
+      hue: hue + rand(-12, 12), size: rand(3, 7)
+    });
+  }
+}
+var floatHearts = [];
+function spawnFloatHeart(x, y, big) {
+  floatHearts.push({
+    x: x, y: y, vy: rand(-2.6, -1.4), sw: rand(0.6, 1.6), ph: rand(0, TAU),
+    size: big ? rand(22, 34) : rand(10, 20),
+    hue: [340, 350, 15, 330][(Math.random() * 4) | 0],
+    life: 1, decay: big ? rand(0.006, 0.010) : rand(0.010, 0.016),
+    rot: rand(-0.4, 0.4)
+  });
+}
+function drawHeartPath(c, x, y, s) {
+  c.beginPath();
+  c.moveTo(x, y + 0.32 * s);
+  c.bezierCurveTo(x - 0.55 * s, y - 0.08 * s, x - 0.38 * s, y - 0.48 * s, x, y - 0.22 * s);
+  c.bezierCurveTo(x + 0.38 * s, y - 0.48 * s, x + 0.55 * s, y - 0.08 * s, x, y + 0.32 * s);
+  c.closePath();
+}
+
+/* ============ 心跳 & 3D 摆动 ============ */
+function beatScale(t) { // “lub-dub” 双峰心跳
+  var c = (t * 0.82) % 1; // ≈72bpm
+  var p1 = Math.exp(-Math.pow((c - 0.10) * 8.5, 2));
+  var p2 = 0.55 * Math.exp(-Math.pow((c - 0.34) * 10, 2));
+  return 1 + 0.085 * (p1 + p2);
+}
+function rotY(t) { return Math.sin(t * 0.42) * 0.55; }
+
+/* ============ 状态机 ============ */
+var phase = 'idle';          // idle → gather → type → finale → together
+var sceneStart = 0;
+var together = false;
+
+/* ============ 打字机 ============ */
+var LINES = [
+  { text: '陈小晶，先坦白：红包是假的' },
+  { text: '但我对你的喜欢，是真的' },
+  { text: '遇见你之前，我的世界只有 0 和 1' },
+  { text: '遇见你之后，连报错都想读给你听' },
+  { text: '我对你的心动，是一个死循环——' },
+  { text: 'while (true) { love(小晶); }', code: true },
+  { text: '没有 break，也永远不需要出口' },
+  { text: '所以，想认真地问你一件事 ↓' }
+];
+var lineEl = document.getElementById('line');
+var skipHint = document.getElementById('skipHint');
+var typeTimer = null, lineIdx = 0, typing = false;
+
+function typeLine(i) {
+  if (i >= LINES.length) { enterFinale(); return; }
+  lineIdx = i; typing = true;
+  var L = LINES[i];
+  lineEl.className = L.code ? 'code' : '';
+  lineEl.classList.remove('fade');
+  lineEl.textContent = '';
+  var pos = 0;
+  (function step() {
+    if (!typing) return;
+    pos++;
+    lineEl.textContent = L.text.slice(0, pos);
+    if (pos < L.text.length) {
+      typeTimer = setTimeout(step, L.code ? 70 : 90);
+    } else {
+      typeTimer = setTimeout(function () {
+        if (!typing) return;
+        if (i === LINES.length - 1) { enterFinale(); return; }
+        lineEl.classList.add('fade');
+        typeTimer = setTimeout(function () { typeLine(i + 1); }, 420);
+      }, 1500);
+    }
+  })();
+}
+function skipType() { // 轻触加速：当前句瞬间打完，再点直接下一句
+  if (phase !== 'type') return;
+  clearTimeout(typeTimer);
+  var L = LINES[lineIdx];
+  var done = lineEl.textContent.length >= L.text.length;
+  if (!done) {
+    lineEl.textContent = L.text;
+    typeTimer = setTimeout(function () {
+      if (lineIdx === LINES.length - 1) { enterFinale(); return; }
+      lineEl.classList.add('fade');
+      typeTimer = setTimeout(function () { typeLine(lineIdx + 1); }, 300);
+    }, 600);
+  } else {
+    if (lineIdx === LINES.length - 1) { enterFinale(); return; }
+    lineEl.classList.add('fade');
+    typeTimer = setTimeout(function () { typeLine(lineIdx + 1); }, 250);
+  }
+}
+
+/* ============ 终幕 ============ */
+var finaleEl = document.getElementById('finale');
+var btnRow = document.getElementById('btnRow');
+var bigTitle = document.getElementById('bigTitle');
+var subTitle = document.getElementById('subTitle');
+var fwTimer = null;
+
+function enterFinale() {
+  if (phase === 'finale' || phase === 'together') return;
+  phase = 'finale';
+  typing = false; clearTimeout(typeTimer);
+  lineEl.classList.add('fade');
+  skipHint.classList.remove('show');
+  setTimeout(function () { lineEl.textContent = ''; }, 380);
+  setTimeout(function () { finaleEl.classList.add('show'); }, 250);
+  setTimeout(function () { spawnFirework(CX, H * 0.3); }, 700);
+  fwTimer = setInterval(function () {
+    spawnFirework(rand(W * 0.15, W * 0.85), rand(H * 0.12, H * 0.45));
+  }, 1500);
+}
+
+document.getElementById('yesBtn').addEventListener('click', function () {
+  if (phase !== 'finale') return;
+  phase = 'together'; together = true;
+  music.faster();
+  btnRow.classList.add('gone');
+  bigTitle.textContent = '❤ 我们的故事从此开始 ❤';
+  subTitle.textContent = '—— 爱你的 王浩儒';
+  // 满屏爱心爆炸
+  for (var i = 0; i < 5; i++) {
+    (function (d) {
+      setTimeout(function () {
+        spawnFirework(rand(W * 0.15, W * 0.85), rand(H * 0.15, H * 0.5));
+      }, d * 260);
+    })(i);
+  }
+  var rain = 0;
+  var rainT = setInterval(function () {
+    for (var k = 0; k < 3; k++) spawnFloatHeart(rand(0, W), H + 30, Math.random() < 0.4);
+    if (++rain > 14) clearInterval(rainT);
+  }, 160);
+  clearInterval(fwTimer);
+  fwTimer = setInterval(function () {
+    spawnFirework(rand(W * 0.1, W * 0.9), rand(H * 0.1, H * 0.5));
+    if (Math.random() < 0.5) spawnFloatHeart(rand(0, W), H + 20, false);
+  }, 900);
+});
+
+/* “让我想想”按钮逃跑 */
+var noBtn = document.getElementById('noBtn');
+var bubble = document.getElementById('bubble');
+var noCount = 0;
+var NO_TEXTS = [
+  '哎呀，这个按钮好像坏了~',
+  '它今天不想上班 😜',
+  '要不…看看另一个？👉',
+  '你抓不到我的~',
+  '再想想就要被删掉啦',
+  '真的点不到了啦 😝',
+  '左边那个才是正确答案 💗'
+];
+function showBubble() {
+  bubble.textContent = NO_TEXTS[Math.min(noCount - 1, NO_TEXTS.length - 1)];
+  var r = noBtn.getBoundingClientRect();
+  bubble.style.left = clamp(r.left + r.width / 2 - bubble.offsetWidth / 2, 10, W - bubble.offsetWidth - 10) + 'px';
+  bubble.style.top = Math.max(10, r.top - 46) + 'px';
+  bubble.classList.add('show');
+  setTimeout(function () { bubble.classList.remove('show'); }, 1600);
+}
+function runAway() {
+  noCount++;
+  var bw = noBtn.offsetWidth, bh = noBtn.offsetHeight;
+  var nx = rand(16, Math.max(20, W - bw - 16));
+  var ny = rand(H * 0.55, Math.max(H * 0.6, H - bh - 20));
+  noBtn.style.transform = 'translate(' + (nx - noBtn.offsetLeft) + 'px,' + (ny - noBtn.offsetTop) + 'px) scale(' + (noCount >= 5 ? 0.82 : 1) + ')';
+  showBubble();
+}
+noBtn.addEventListener('mouseenter', runAway);
+noBtn.addEventListener('touchstart', function (e) { e.preventDefault(); runAway(); }, { passive: false });
+
+/* ============ 全局点按：冒小心心 + 加速 ============ */
+var tapViaTouch = false;
+function onTap(x, y) {
+  spawnFloatHeart(x, y - 10, false);
+  if (Math.random() < 0.35) spawnFloatHeart(x + rand(-30, 30), y + rand(-10, 20), false);
+  skipType();
+}
+document.addEventListener('touchstart', function (e) {
+  if (phase === 'idle') return;
+  tapViaTouch = true;
+  var t = e.touches[0];
+  onTap(t.clientX, t.clientY);
+}, { passive: true });
+document.addEventListener('click', function (e) {
+  if (phase === 'idle') return;
+  if (tapViaTouch) { tapViaTouch = false; return; }
+  onTap(e.clientX, e.clientY);
+});
+
+/* ============ Web Audio 生成音乐（卡农风分解和弦） ============ */
+var music = (function () {
+  var ac = null, master = null, delaySend = null, muted = false;
+  var timer = null, nextTime = 0, step = 0, beatDur = 60 / 72;
+  // D - A - Bm - F#m - G - D - G - A，每小节 4 拍分解
+  var SEQ = [
+    [62, 66, 69, 74], [57, 61, 64, 69], [59, 62, 66, 71], [54, 57, 61, 66],
+    [55, 59, 62, 67], [62, 66, 69, 74], [55, 59, 62, 67], [57, 61, 64, 69]
+  ];
+  function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+  function note(freq, when, dur, vol) {
+    var o1 = ac.createOscillator(), o2 = ac.createOscillator();
+    var g = ac.createGain();
+    o1.type = 'triangle'; o1.frequency.value = freq;
+    o2.type = 'sine'; o2.frequency.value = freq * 2;      // 八度泛音提亮
+    var g2 = ac.createGain(); g2.gain.value = 0.25;
+    o1.connect(g); o2.connect(g2); g2.connect(g);
+    g.connect(master); g.connect(delaySend);
+    var a = 0.015, r = dur * 0.9;
+    g.gain.setValueAtTime(0, when);
+    g.gain.linearRampToValueAtTime(vol, when + a);
+    g.gain.exponentialRampToValueAtTime(0.001, when + dur);
+    o1.start(when); o2.start(when);
+    o1.stop(when + dur + 0.05); o2.stop(when + dur + 0.05);
+  }
+  function scheduler() {
+    while (nextTime < ac.currentTime + 0.12) {
+      var bar = (step / 4) | 0, beat = step % 4;
+      var m = SEQ[bar % SEQ.length][beat];
+      note(midiToFreq(m), nextTime, beatDur * 2.1, 0.16);
+      // 偶发高音闪点，像星星落在和弦上
+      if (beat === 2 && Math.random() < 0.4) {
+        note(midiToFreq(m + 12), nextTime + beatDur * 0.5, beatDur * 1.2, 0.07);
+      }
+      nextTime += beatDur; step++;
+    }
+  }
+  return {
+    start: function () {
+      if (ac) { ac.resume(); return; }
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      ac = new AC();
+      master = ac.createGain(); master.gain.value = 0.5; master.connect(ac.destination);
+      // 梦幻回声：delay + 反馈
+      var delay = ac.createDelay(1.0); delay.delayTime.value = beatDur * 1.5;
+      var fb = ac.createGain(); fb.gain.value = 0.34;
+      var wet = ac.createGain(); wet.gain.value = 0.28;
+      delaySend = ac.createGain(); delaySend.gain.value = 1;
+      delaySend.connect(delay); delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(master);
+      nextTime = ac.currentTime + 0.1; step = 0;
+      timer = setInterval(scheduler, 40);
+    },
+    faster: function () {
+      beatDur = 60 / 84;
+      if (ac) { /* 已排的音自然衔接 */ }
+    },
+    toggleMute: function () {
+      muted = !muted;
+      if (master) master.gain.linearRampToValueAtTime(muted ? 0 : 0.5, ac.currentTime + 0.15);
+      return muted;
+    }
+  };
+})();
+document.getElementById('muteBtn').addEventListener('click', function () {
+  this.textContent = music.toggleMute() ? '🔇' : '🔊';
+  this.blur();
+});
+
+/* ============ 开场：默认“拼多多红包”门面，?love=1 直接进信封 ============ */
+function startLove() {
+  music.start();
+  phase = 'gather'; sceneStart = performance.now() / 1000;
+  document.title = '💌 写给陈小晶';
+  var fav = document.getElementById('favicon');
+  fav.setAttribute('href', "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>");
+  skipHint.classList.add('show');
+  setTimeout(function () { skipHint.classList.remove('show'); }, 6000);
+}
+
+var pddEl = document.getElementById('pdd');
+var introEl = document.getElementById('intro');
+var openBtnEl = document.getElementById('openBtn');
+var directMode = location.search.indexOf('love') >= 0;
+if (directMode) {
+  pddEl.style.display = 'none';
+  document.title = '💌 写给陈小晶';
+} else {
+  introEl.style.display = 'none';
+}
+
+openBtnEl.addEventListener('click', function () {
+  introEl.classList.add('hide');
+  startLove();
+});
+
+/* 拼多多门面：倒计时 + 助力 → 翻转 */
+var pddBtn = document.getElementById('pddBtn');
+var pddCd = document.getElementById('pddCd');
+var cdLeft = 59;
+var cdTimer = setInterval(function () {
+  if (--cdLeft < 0) cdLeft = 0;
+  pddCd.textContent = '00:' + (cdLeft < 10 ? '0' : '') + cdLeft;
+}, 1000);
+
+var pddBusy = false;
+pddBtn.addEventListener('click', function () {
+  if (pddBusy) return;
+  pddBusy = true;
+  clearInterval(cdTimer);
+  document.getElementById('pddBar').style.width = '100%';
+  document.getElementById('pddPct').textContent = '已助力 100.00%';
+  pddBtn.textContent = '正在验算红包...';
+  setTimeout(function () {
+    pddBtn.textContent = '提现成功 🎉 正在到账...';
+    document.getElementById('pddNote').textContent = '¥618.00 已存入你的零钱';
+  }, 700);
+  setTimeout(function () {
+    pddEl.classList.add('go');
+    startLove();
+    setTimeout(function () {
+      pddEl.style.display = 'none';
+      spawnFirework(CX, H * 0.28);
+      spawnFirework(W * 0.3, H * 0.35);
+      spawnFirework(W * 0.7, H * 0.35);
+    }, 450);
+  }, 1600);
+});
+
+/* ============ 主渲染循环 ============ */
+var last = performance.now();
+function frame(now) {
+  var dt = clamp((now - last) / 1000, 0, 0.05);
+  last = now;
+  var t = now / 1000;
+  var ts = t - sceneStart;
+
+  // 拖尾清屏
+  ctx.fillStyle = 'rgba(7, 7, 15, 0.34)';
+  ctx.fillRect(0, 0, W, H);
+
+  // 星尘
+  for (var i = 0; i < stars.length; i++) {
+    var st = stars[i];
+    var tw = 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(t * st.sp + st.ph));
+    ctx.globalAlpha = tw;
+    ctx.fillStyle = '#cfd8ff';
+    ctx.beginPath();
+    ctx.arc(st.x * W, st.y * H, st.r, 0, TAU);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  if (phase !== 'idle') {
+    var bs = beatScale(ts);
+    var ry = rotY(t);
+    var ca = Math.cos(ry), sa = Math.sin(ry);
+    var gathered = phase !== 'gather';
+
+    // ---- 心形粒子 ----
+    for (var p = 0; p < particles.length; p++) {
+      var pt = particles[p];
+      var prog = clamp((ts - pt.delay) / pt.dur, 0, 1);
+      var e = easeOutCubic(prog);
+      // 3D 绕 Y 旋转投影
+      var rx = pt.hx * ca + pt.z * sa;
+      var rz = -pt.hx * sa + pt.z * ca;
+      var persp = 1 + rz * 0.03;
+      var wob = gathered ? Math.sin(t * 2.2 + pt.ph) * 1.4 : 0;
+      var txx = CX + rx * heartScale * bs * persp + wob;
+      var tyy = CY + (pt.hy * heartScale * bs * persp) * 0.92 + wob * 0.6;
+      var ex = pt.sx * W, ey = pt.sy * H;
+      var x = ex + (txx - ex) * e;
+      var y = ey + (tyy - ey) * e;
+      var s = pt.size * persp * (0.6 + 0.4 * e);
+      ctx.globalAlpha = clamp(prog * (0.5 + 0.5 * persp), 0, 1);
+      ctx.drawImage(pt.sprite, x - s / 2, y - s / 2, s, s);
+    }
+    ctx.globalAlpha = 1;
+
+    // gather 完成 → 进入打字
+    if (phase === 'gather' && ts > 3.2) { phase = 'type'; typeLine(0); }
+
+    // 终幕大心描边（柔和光圈）
+    if (phase === 'finale' || phase === 'together') {
+      ctx.save();
+      ctx.globalAlpha = 0.10 + 0.05 * Math.sin(t * 2.4);
+      ctx.strokeStyle = '#ff7fae';
+      ctx.lineWidth = 2;
+      var R = 15.6 * heartScale * bs;
+      ctx.beginPath();
+      for (var tt = 0; tt <= TAU + 0.05; tt += 0.05) {
+        var hp = heartXY(tt);
+        var px = CX + hp.x * heartScale * bs * (1 - 0.0);
+        var py = CY + hp.y * heartScale * bs * 0.92;
+        if (tt === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // ---- 烟花 ----
+  for (var f = fireworks.length - 1; f >= 0; f--) {
+    var fw = fireworks[f];
+    fw.x += fw.vx; fw.y += fw.vy; fw.vy += 0.055; fw.vx *= 0.985; fw.vy *= 0.985;
+    fw.life -= fw.decay;
+    if (fw.life <= 0) { fireworks.splice(f, 1); continue; }
+    ctx.globalAlpha = clamp(fw.life, 0, 1);
+    ctx.fillStyle = 'hsla(' + fw.hue + ', 95%, 68%, 1)';
+    ctx.beginPath();
+    ctx.arc(fw.x, fw.y, fw.size * fw.life, 0, TAU);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // ---- 漂浮小心心 ----
+  for (var h = floatHearts.length - 1; h >= 0; h--) {
+    var fh = floatHearts[h];
+    fh.y += fh.vy; fh.ph += 0.05;
+    fh.x += Math.sin(fh.ph) * fh.sw * 0.6;
+    fh.life -= fh.decay;
+    if (fh.life <= 0 || fh.y < -60) { floatHearts.splice(h, 1); continue; }
+    ctx.save();
+    ctx.globalAlpha = clamp(fh.life, 0, 1);
+    ctx.translate(fh.x, fh.y);
+    ctx.rotate(fh.rot * Math.sin(fh.ph * 0.7));
+    drawHeartPath(ctx, 0, 0, fh.size);
+    var hg = ctx.createLinearGradient(0, -fh.size / 2, 0, fh.size / 2);
+    hg.addColorStop(0, 'hsla(' + (fh.hue + 10) + ', 100%, 74%, .95)');
+    hg.addColorStop(1, 'hsla(' + fh.hue + ', 90%, 58%, .9)');
+    ctx.fillStyle = hg;
+    ctx.fill();
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
